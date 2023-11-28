@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Accessibility Report For {{pageUrl}} ({{generationDate}})</title>
+  <style>
+    <!-- Add your styling here -->
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Accessibility Report For "{{pageUrl}}"</h1>
+    <p>Generated at: {{generationDate}}</p>
+    <p class="counts">
+      <span class="count error">{{errorCount}} errors</span>
+      <span class="count warning">{{warningCount}} warnings</span>
+      <span class="count notice">{{noticeCount}} notices</span>
+    </p>
+    <ul class="clean-list results-list">
+      {{#issues}}
+        <li class="result {{type}}">
+          <h2>{{type}}: {{message}}</h2>
+          <p>{{code}}</p>
+          <pre>{{context}} (select with "{{selector}}")</pre>
+        </li>
+      {{/issues}}
+    </ul>
+  </div>
+</body>
+</html>

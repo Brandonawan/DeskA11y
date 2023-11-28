@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';">
+  <title>DeskA11y Accessibility Checker</title>
+  <style>
+    body {
+      background-color: #4c4a44;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .page {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #18bc9c;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #ffffff;
+      margin-bottom: 20px; /* Add some space below the app name */
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+      color: #ffffff;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #ffffff;
+      color: #4c4a44;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #resultLabel {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      overflow: auto;
+    }
+
+    #resultLabel p {
+      margin: 0;
+    }
+
+    #copyButton {
+      display: none;
+      background-color: #3498db;
+      color: #ffffff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <h1>DeskA11y Accessibility Checker</h1>
+
+    <label for="urlInput">Enter URL:</label>
+    <input type="text" id="urlInput">
+    
+    <label for="standardsFormat">Standards Format:</label>
+    <select id="standardsFormat">
+      <option value="WCAG2A">WCAG 2A</option>
+      <option value="WCAG2AA" selected>WCAG 2AA (Default)</option>
+      <option value="WCAG2AAA">WCAG 2AAA</option>
+    </select>
+
+    <label for="outputFile">Output Filename:</label>
+    <input type="text" id="outputFile">
+    
+    <label for="outputFormat">Output Format:</label>
+    <select id="outputFormat">
+      <option value="html">HTML</option>
+      <option value="json">JSON</option>
+      <option value="csv">CSV</option>
+      <option value="markup">Markup</option>
+      <option value="xml">XML</option>
+    </select>
+
+    <label for="outputFolder">Output Folder:</label>
+    <input type="text" id="outputFolder">
+    
+    <label for="runner">Runner:</label>
+    <select id="runner">
+      <option value="axe">Axe</option>
+      <option value="htmlcs" selected>HTMLCS</option>
+    </select>
+
+    <button id="selectOutputFolder">Select Folder</button>
+
+    <button id="runPa11yButton">Run Pa11y</button>
+
+    <div id="resultLabel"></div>
+    <button id="copyButton" onclick="copyResult()">Copy Result</button>
+  </div>
+  
+  <script>
+    document.getElementById('selectOutputFolder').addEventListener('click', selectOutputFolder);
+
+    // Function to open the folder selection dialog
+    async function selectOutputFolder() {
+      const result = await window.api.selectOutputFolder();
+      if (!result.canceled && result.filePaths.length > 0) {
+        document.getElementById('outputFolder').value = result.filePaths[0];
+      }
+    }
+
+    document.getElementById('runPa11yButton').addEventListener('click', runPa11y);
+  
+    async function runPa11y() {
+      try {
+        const url = document.getElementById('urlInput').value;
+        const standardsFormat = document.getElementById('standardsFormat').value;
+        const outputFile = document.getElementById('outputFile').value;
+        const outputFormat = document.getElementById('outputFormat').value;
+        const outputFolder = document.getElementById('outputFolder').value;
+        const runner = document.getElementById('runner').value;
+
+        console.log('Running Pa11y with:', url, standardsFormat, outputFile, outputFormat, outputFolder, 'Runner:', runner);
+
+        window.api.runPa11y(url, standardsFormat, outputFile, outputFormat, outputFolder, runner);
+      } catch (error) {
+        console.error('Error running Pa11y:', error);
+      }
+    }
+
+    window.api.receivePa11yResult((result) => {
+      const resultLabel = document.getElementById('resultLabel');
+      const copyButton = document.getElementById('copyButton');
+
+      if (result.error) {
+        resultLabel.innerHTML = `<p>Error occurred: ${result.error}</p>`;
+        copyButton.style.display = 'none'; // Hide the Copy button on error
+      } else {
+        resultLabel.innerHTML = `<p>${result.result}</p>`;
+        copyButton.style.display = result.result ? 'block' : 'none'; // Show the Copy button only if there's a result
+      }
+    });
+
+    function copyResult() {
+      const resultLabel = document.getElementById('resultLabel');
+      const resultText = resultLabel.innerText;
+
+      if (resultText) {
+        const textarea = document.createElement('textarea');
+        textarea.value = resultText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+
+        alert('Result copied to clipboard!');
+      }
+    }
+  </script>
+</body>
+</html>
