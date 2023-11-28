@@ -13,7 +13,7 @@ DeskA11y is an open-source desktop application for accessibility checking. It en
 ### Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/DeskA11y.git
+   git clone git@github.com:Brandonawan/DeskA11y.git
    cd DeskA11y
     ```
 
